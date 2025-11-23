@@ -1,90 +1,174 @@
-/* Contenedor principal */
-.detalle-container {
-    max-width: 1300px;
-    width: 95%;
-    margin: 2rem auto;
-    padding: 2rem;
-    color: white;
-    background-color: rgba(20, 20, 20, 0.85);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
+/* src/css/hiloDetalle.css */
+
+/* --- CONTENEDOR PRINCIPAL (CÁPSULA) --- */
+.card-hilo-unica {
+    background-color: rgba(20, 20, 20, 0.85); /* Fondo oscuro principal */
+    backdrop-filter: blur(12px);               /* Efecto cristal */
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 40px rgba(114, 0, 255, 0.2);
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 0 50px rgba(114, 0, 255, 0.15); /* Sombra sutil morada */
+    color: #fff;
+    max-width: 900px;
+    margin: 0 auto; /* Centrado */
 }
 
-.detalle-header {
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 1rem;
-}
-
-.detalle-meta {
-    color: #aaa;
-    font-size: 0.9rem;
-    display: flex;
-    gap: 15px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-}
-
-/* --- ARREGLO DE IMAGEN Y CONTENEDOR --- */
-.detalle-imagen-container {
-    width: 100%;
-    /* CAMBIO IMPORTANTE: Altura automática para que la caja se ajuste a la imagen */
-    height: auto; 
-    background-color: #000; /* Fondo negro opcional */
-    border-radius: 15px;
-    margin-bottom: 2rem;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-    
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-}
-
-.detalle-imagen {
-    /* La imagen intenta ocupar todo el ancho */
-    width: 100%; 
-    height: auto; 
-    /* Pero nunca pasará del 85% de la altura de la pantalla */
-    max-height: 85vh; 
-    /* Mantiene su proporción original sin deformarse */
-    object-fit: contain; 
-    display: block;
-}
-/* -------------------------------------- */
-
-.detalle-contenido {
-    font-size: 1.1rem;
-    line-height: 1.8;
-    color: #e0e0e0;
-    margin-bottom: 3rem;
-    text-align: left;
-    max-width: 100%;
-}
-
-.comentarios-section {
-    background-color: rgba(255, 255, 255, 0.05);
-    padding: 1.5rem;
-    border-radius: 15px;
-    text-align: left;
-}
-
+/* --- BOTÓN VOLVER (ESTILO INTEGRADO) --- */
 .btn-volver {
-    background-color: transparent;
-    border: 1px solid #F0127E;
-    color: #F0127E;
-    padding: 0.5rem 1.5rem;
-    border-radius: 50px;
-    font-weight: bold;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ccc;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
     transition: all 0.3s ease;
-    margin-bottom: 20px;
-    cursor: pointer;
 }
 
 .btn-volver:hover {
+    border-color: #F0127E;
+    color: white;
+    background: rgba(240, 18, 126, 0.2);
+    box-shadow: 0 0 10px rgba(240, 18, 126, 0.3);
+}
+
+/* --- HEADER DEL HILO --- */
+.hilo-header {
+    margin-top: 1rem;
+}
+
+.hilo-meta {
+    color: #ccc;
+    font-size: 1.1rem;
+    margin-top: 10px;
+}
+
+/* --- CUERPO DEL HILO (IMAGEN Y TEXTO) --- */
+.imagen-frame {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #000;
+}
+
+.imagen-principal {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain; /* Ajusta sin recortar */
+    display: block;
+}
+
+.texto-contenido {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: #e0e0e0;
+}
+
+/* --- ELEMENTOS DECORATIVOS --- */
+.divider-neon {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #F0127E, transparent);
+    margin: 2.5rem 0;
+    opacity: 0.8;
+}
+
+/* --- SECCIÓN DE COMENTARIOS --- */
+.hilo-footer-comentarios {
+    /* Integrado en la tarjeta principal */
+}
+
+.comentario-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 1rem;
+}
+
+.comentario-row:last-child {
+    border-bottom: none;
+}
+
+/* Avatar */
+.avatar-circle {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, #3a0266, #F0127E);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.comentario-data {
+    flex-grow: 1;
+}
+
+.autor-nombre {
+    color: #00cfff; /* Cyan neón */
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.fecha-texto {
+    font-size: 0.85rem;
+    color: #777;
+}
+
+.mensaje-texto {
+    margin-top: 5px;
+    color: #ddd;
+    font-size: 1rem;
+}
+
+/* --- FORMULARIO NUEVO COMENTARIO (FLEXBOX) --- */
+.input-area {
+    display: flex;
+    flex-direction: column; /* Elementos uno debajo del otro */
+    align-items: flex-end;  /* Alinea el botón a la derecha */
+    gap: 10px;              /* Espacio entre textarea y botón */
+    margin-top: 1rem;
+}
+
+.input-dark {
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    border-radius: 10px !important;
+    width: 100%;
+}
+
+.input-dark:focus {
+    border-color: #F0127E !important;
+    box-shadow: 0 0 10px rgba(240, 18, 126, 0.3) !important;
+    outline: none;
+}
+
+.btn-enviar {
     background-color: #F0127E;
     color: white;
-    box-shadow: 0 0 10px #F0127E;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 30px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    /* Sin float */
+}
+
+.btn-enviar:hover:not(:disabled) {
+    background-color: #d60066;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(240, 18, 126, 0.4);
+}
+
+.btn-enviar:disabled {
+    background-color: #555;
+    opacity: 0.6;
+    cursor: not-allowed;
 }
