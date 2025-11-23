@@ -1,0 +1,111 @@
+/* Contenedor principal en donde estaran las publicaciones */
+.main-wrapper {
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 2rem auto;
+  background-color: transparent;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Contenedor con fondo oscuro para la sección de los hilos */
+.hilos-wrapper {
+  background-color: radial-gradient(circle at center top, rgba(114, 0, 255, 0.6) 0%, transparent 70%);
+  padding: 2rem 1rem;
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  margin-top: 2rem;
+}
+
+/* === PESTAÑAS DE CATEGORÍAS (Pills) === */
+
+.nav-link:hover {
+  transform: scale(1.15);
+}
+.nav-pills .nav-link {
+  color: #ffffff;
+  border-radius: 20px;
+  font-weight: bold;
+}
+.nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+  background-color: #ffee00 !important; 
+}
+
+/* === TARJETA DE LOS HILOS === */
+.custom-card {
+  background-color: #f8000018 !important; /* Color de fondo oscuro */
+  border: none!important;
+  border-radius: 12px;
+  color: white !important; /* Texto blanco para que se lea */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.custom-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+
+}
+
+.card-title {
+  font-weight: bold;
+}
+
+.card-text {
+  font-size: 14px;
+}
+
+.img-top {
+  border-radius: 12px;
+}
+
+/* === BOTONES Y MODAL === */
+
+/* Botón personalizado para "Añadir Hilo" */
+.btn-custom {
+  background-color: #F0127E !important; 
+ color: white !important;  /* <-- Texto en color blanco */
+  font-weight: bold!important;
+  border-radius: 50px!important;       
+  border: none!important;             /* Sin borde */
+  cursor: pointer!important;
+ transition: background-color 0.3s ease, transform 0.2s ease!important;
+}
+
+.btn-custom:hover {
+  background-color: #C20E66 !important; /* <-- Un rosado un poco más oscuro al pasar el ratón */
+  color: white!important;
+  transform: scale(1.15)!important; /* Opcional: un pequeño efecto de zoom */
+  box-shadow: 0 0 12px;
+
+}
+
+/* Estilos para el popup (modal) */
+.modal-content.custom-modal {
+  background-color: rgba(73, 20, 133, 0.85)!important;
+  color: white!important;
+  border-radius: 8px!important;
+  border: none!important;
+  backdrop-filter: blur(5px)!important;
+}
+
+/* Estilos para los campos del formulario dentro del modal */
+.form-control, .form-select {
+  background-color: rgba(0, 0, 0, 0.5); /* Fondo negro semi-transparente */
+  color: white; /* Texto blanco */
+  border: 2px solid #0011ff;
+}
+
+.form-control::placeholder {
+  color: #bbb;
+}
+
+/* === ¡AQUÍ ESTABA EL ERROR CORREGIDO! === */
+.form-control:focus, .form-select:focus {
+  background-color: black;
+  color: white; /* Texto blanco */
+  border-color: #00cfff; /* Un color que resalte */
+  box-shadow: 0 0 5px #00cfff; /* Sombra al seleccionar */
+}

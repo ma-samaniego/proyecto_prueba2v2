@@ -1,0 +1,90 @@
+/* Contenedor principal */
+.detalle-container {
+    max-width: 1300px;
+    width: 95%;
+    margin: 2rem auto;
+    padding: 2rem;
+    color: white;
+    background-color: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 40px rgba(114, 0, 255, 0.2);
+}
+
+.detalle-header {
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+}
+
+.detalle-meta {
+    color: #aaa;
+    font-size: 0.9rem;
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+/* --- ARREGLO DE IMAGEN Y CONTENEDOR --- */
+.detalle-imagen-container {
+    width: 100%;
+    /* CAMBIO IMPORTANTE: Altura automática para que la caja se ajuste a la imagen */
+    height: auto; 
+    background-color: #000; /* Fondo negro opcional */
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.detalle-imagen {
+    /* La imagen intenta ocupar todo el ancho */
+    width: 100%; 
+    height: auto; 
+    /* Pero nunca pasará del 85% de la altura de la pantalla */
+    max-height: 85vh; 
+    /* Mantiene su proporción original sin deformarse */
+    object-fit: contain; 
+    display: block;
+}
+/* -------------------------------------- */
+
+.detalle-contenido {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #e0e0e0;
+    margin-bottom: 3rem;
+    text-align: left;
+    max-width: 100%;
+}
+
+.comentarios-section {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 15px;
+    text-align: left;
+}
+
+.btn-volver {
+    background-color: transparent;
+    border: 1px solid #F0127E;
+    color: #F0127E;
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.btn-volver:hover {
+    background-color: #F0127E;
+    color: white;
+    box-shadow: 0 0 10px #F0127E;
+}

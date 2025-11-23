@@ -1,0 +1,110 @@
+/*
+ * Contenedor principal que simula el fondo de la imagen.
+ * Asumo que .main-content de tu app.css centrará este contenedor.
+ */
+.contacto-container {
+  background-color: radial-gradient(circle at center top, rgba(114, 0, 255, 0.6) 0%, transparent 70%);
+  padding: 2.5rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  color: white;
+  
+  /* Ancho máximo, similar a tus otros formularios */
+  width: 90%;
+  max-width: 500px; 
+  margin: 2rem auto; /* Centrado */
+  text-align: center;
+}
+
+.contacto-container h1 {
+  font-weight: bold;
+  font-size: 2.8rem;
+  margin-bottom: 0.5rem;
+  font-family: Arial, sans-serif;
+}
+
+.contacto-container p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  font-family: Arial, sans-serif;
+}
+
+/*
+ * Alineamos el formulario a la izquierda para que las
+ * etiquetas queden sobre los campos, como en la imagen.
+ */
+.contacto-form {
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-family: Arial, sans-serif;
+}
+
+/*
+ * Estilo para los inputs y el textarea, fondo blanco
+ * y bordes redondeados.
+ */
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: none;
+  border-radius: 8px; /* Bordes redondeados */
+  background-color: white;
+  color: #333; /* Color del texto dentro del input */
+  font-size: 1rem;
+  box-sizing: border-box; /* Asegura que el padding no rompa el ancho */
+}
+
+.form-group textarea {
+  min-height: 140px;
+  resize: vertical; /* Permite al usuario ajustar la altura */
+}
+
+/* Estilo para el botón de enviar */
+.submit-btn {
+  width: 100%;
+  padding: 0.9rem;
+  border: none;
+  border-radius: 8px;
+  
+  /* Color de fondo claro, como en la imagen */
+  background-color: #e6f7ff; 
+  
+  /* Color del texto */
+  color: #0056b3; 
+  
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #d4f0ff;
+}
+
+/* Botón deshabilitado */
+.submit-btn:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Mensajes de error (color claro para contrastar) */
+.text-danger-contacto {
+  color: #ffdddd; /* Un rojo pálido que contrasta con el cian */
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+  display: block;
+}
