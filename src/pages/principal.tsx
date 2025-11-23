@@ -1,8 +1,13 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Importamos hook de navegación
+import { useNavigate } from "react-router-dom"; 
 import '../css/principal.css'; 
+
+// --- CORRECCIÓN LÍNEA 7 ---
+// Usamos "import * as" para traer todo el módulo y evitar errores de exportación
+import * as bootstrap from 'bootstrap';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'; 
-import { initialHilosData } from '../data/hilosData'; // Usamos los datos centralizados
+
+import { initialHilosData } from '../data/hilosData'; 
 
 const categories = ['Shooter', 'RPG', 'Indie', 'Noticias', 'Retro'];
 
@@ -10,7 +15,6 @@ const Principal: React.FC = () => {
  const [hilos, setHilos] = useState(initialHilosData);
  const [activeCategory, setActiveCategory] = useState('Shooter');
  
- // Estados del formulario
  const [categoria, setCategoria] = useState('');
  const [mensaje, setMensaje] = useState('');
  const [urlImagen, setUrlImagen] = useState('');
@@ -21,9 +25,7 @@ const Principal: React.FC = () => {
    setActiveCategory(category);
  };
 
- // --- FUNCIÓN DE CLIC EN TARJETA ---
  const handleCardClick = (hilo: any) => {
-    // Navegamos y pasamos el objeto hilo completo
     navigate(`/hilo/${hilo.id}`, { state: { hilo } });
  };
 
@@ -49,13 +51,14 @@ const Principal: React.FC = () => {
    setMensaje('');
    setUrlImagen('');
 
-   // Cerrar modal
-   // @ts-ignore
+   // --- USO CORREGIDO ---
+   // Ahora accedemos a Modal a través del objeto 'bootstrap'
    const modalElement = document.getElementById('addHiloModal');
-   if (modalElement && typeof bootstrap !== 'undefined') {
-     // @ts-ignore
+   if (modalElement) {
      const modalInstance = bootstrap.Modal.getInstance(modalElement);
-     if (modalInstance) modalInstance.hide();
+     if (modalInstance) {
+       modalInstance.hide();
+     }
    }
  };
 
@@ -91,7 +94,6 @@ const Principal: React.FC = () => {
              <div 
                 className="card custom-card mb-3" 
                 key={hilo.id}
-                // --- AGREGAMOS EL EVENTO ONCLICK ---
                 onClick={() => handleCardClick(hilo)}
                 style={{ cursor: 'pointer' }}
              >
@@ -106,7 +108,6 @@ const Principal: React.FC = () => {
                    onError={(e) => (e.currentTarget.src = 'https://placehold.co/600x400/333/fff?text=Imagen+No+Encontrada')}
                  />
                  <div className="d-flex justify-content-between text-secondary mt-2">
-                   <span>👍 {hilo.likes}</span>
                    <span>💬 {hilo.comments}</span>
                    <span className="badge bg-dark">{hilo.category}</span>
                  </div>

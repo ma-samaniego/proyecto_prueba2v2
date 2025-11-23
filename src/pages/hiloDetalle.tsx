@@ -39,6 +39,7 @@ const HiloDetalle: React.FC = () => {
     setComentarios([...comentarios, nuevo]);
     setNuevoComentario('');
     
+    // Si quisieras actualizar el contador de comentarios en el objeto hilo:
     if (hilo) {
         setHilo({ ...hilo, comments: comentarios.length + 1 });
     }
@@ -59,7 +60,7 @@ const HiloDetalle: React.FC = () => {
         {/* --- CÁPSULA ÚNICA --- */}
         <div className="card-hilo-unica">
             
-            {/* 1. BOTÓN VOLVER (AHORA DENTRO) */}
+            {/* 1. BOTÓN VOLVER */}
             <div className="mb-4">
                 <button onClick={() => navigate('/principal')} className="btn-volver">
                     ← Volver
@@ -74,8 +75,8 @@ const HiloDetalle: React.FC = () => {
                 </div>
                 <h1 className="display-6 fw-bold mb-3 text-white">{hilo.title}</h1>
                 <div className="hilo-meta">
-                    <span className="me-3">👤 <strong>{hilo.author}</strong></span>
-                    <span>❤️ {hilo.likes} Likes</span>
+                    {/* Likes eliminados, solo queda el autor */}
+                    <span>👤 <strong>{hilo.author}</strong></span>
                 </div>
             </div>
 
