@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api"; // Usamos axios
-import { Modal } from 'bootstrap';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'; 
 import '../css/principal.css';
 
@@ -10,7 +9,7 @@ interface Publicacion {
     id: number;
     userid: number;
     category: string;
-    imageUri: string;
+    imageUri?: string | null; // Puede ser string o null
     title: string;
     description: string;
     authorname: string;
@@ -27,8 +26,8 @@ const Principal: React.FC = () => {
  
  // Formulario
  const [categoria, setCategoria] = useState('');
- const [titulo, setTitulo] = useState(''); // Backend usa 'title'
- const [descripcion, setDescripcion] = useState(''); // Backend usa 'description'
+ const [titulo, setTitulo] = useState(''); 
+ const [descripcion, setDescripcion] = useState(''); 
  const [urlImagen, setUrlImagen] = useState('');
  
  const navigate = useNavigate();
@@ -65,7 +64,8 @@ const Principal: React.FC = () => {
    const nuevaPubli = {
        userid: usuarioId,
        category: categoria,
-       imageUri: urlImagen || 'https://placehold.co/600x400/333/fff?text=PixelHub',
+       // CAMBIO: Si está vacío, enviamos null. NO enviamos ninguna imagen por defecto.
+       imageUri: urlImagen.trim() !== "" ? urlImagen : null,
        title: titulo,
        description: descripcion,
        authorname: autorNombre,
@@ -82,10 +82,10 @@ const Principal: React.FC = () => {
        // Limpiar y cerrar
        setCategoria(''); setTitulo(''); setDescripcion(''); setUrlImagen('');
        
-       const modalElement = document.getElementById('addHiloModal');
-       if (modalElement) {
-         const modalInstance = Modal.getInstance(modalElement);
-         modalInstance?.hide();
+       // Cerrar modal simulando click
+       const btnCerrar = document.querySelector('#addHiloModal .btn-close') as HTMLElement;
+       if (btnCerrar) {
+         btnCerrar.click();
        }
    } catch (error) {
        alert("Error al crear la publicación. Revisa la consola.");
@@ -93,7 +93,7 @@ const Principal: React.FC = () => {
    }
  };
 
- // Filtramos localmente por categoría (podrías hacerlo en backend también)
+ // Filtramos localmente por categoría
  const filteredHilos = hilos.filter(hilo => hilo.category === activeCategory);
 
  return (
@@ -127,8 +127,13 @@ const Principal: React.FC = () => {
                <div className="card-body">
                  <h5 className="card-title">{hilo.title}</h5>
                  <p className="card-text text-muted small">Por {hilo.authorname} - {hilo.createDt ? hilo.createDt.split('T')[0] : ''}</p>
-                 <img className="img-top" src={hilo.imageUri} style={{ width: '100%', maxHeight: '300px', objectFit: 'cover' }} alt={hilo.title} 
-                   onError={(e) => (e.currentTarget.src = 'https://placehold.co/600x400/333/fff?text=No+Image')} />
+                 
+                 {/* CAMBIO: Solo renderizamos la imagen si existe una URL válida */}
+                 {hilo.imageUri && (
+                    <img className="img-top" src={hilo.imageUri} style={{ width: '100%', maxHeight: '300px', objectFit: 'cover' }} alt={hilo.title} 
+                    onError={(e) => (e.currentTarget.style.display = 'none')} /> // Si falla la carga, la ocultamos
+                 )}
+
                  <div className="d-flex justify-content-between text-secondary mt-2">
                    <span className="badge bg-dark">{hilo.category}</span>
                  </div>
@@ -139,7 +144,7 @@ const Principal: React.FC = () => {
        </main>
      </div>
 
-     {/* Modal para añadir hilo (Actualizado con campos reales) */}
+     {/* Modal para añadir hilo */}
      <div className="modal fade" id="addHiloModal" tabIndex={-1} aria-hidden="true">
        <div className="modal-dialog">
          <div className="modal-content custom-modal">
@@ -165,7 +170,7 @@ const Principal: React.FC = () => {
                  <textarea className="form-control" rows={3} value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Contenido del post..."></textarea>
                </div>
                <div className="mb-3">
-                 <label className="form-label">URL Imagen</label>
+                 <label className="form-label">URL Imagen (Opcional)</label>
                  <input type="url" className="form-control" value={urlImagen} onChange={(e) => setUrlImagen(e.target.value)} placeholder="https://..." />
                </div>
                <button type="button" onClick={handleSubmitHilo} className="btn btn-primary w-100">Publicar</button>

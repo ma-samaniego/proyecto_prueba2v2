@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api"; // Usamos tu instancia de Axios configurada
 import '../css/cuenta.css';
 import logo from '../img/logo.png';
-import defaultAvatar from '../img/default-avatar.png'; 
 
 const Cuenta: React.FC = () => {
   const navigate = useNavigate();
@@ -12,9 +11,6 @@ const Cuenta: React.FC = () => {
   const [nombreUsuario, setNombreUsuario] = useState('');
   const [correoelectronico, setCorreoelectronico] = useState('');
   
-  // La foto sigue siendo local porque el backend no tiene campo para imagen de usuario
-  const [fotoActual, setFotoActual] = useState<string | null>(null); 
-
   // Estados para guardar los datos originales y comparar cambios
   const [originalNombre, setOriginalNombre] = useState('');
   const [originalCorreo, setOriginalCorreo] = useState('');
@@ -78,22 +74,6 @@ const Cuenta: React.FC = () => {
     return nuevosErrores;
   };
 
-  // Manejador visual de la foto (Solo Frontend por ahora)
-  const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFotoActual(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleFotoDelete = () => {
-    setFotoActual(null);
-  };
-
   // --- FUNCIÓN DE ACTUALIZACIÓN (PUT) ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,7 +117,7 @@ const Cuenta: React.FC = () => {
     navigate('/principal');
   };
 
-  // Comprobar cambios (excluyendo la foto ya que no se guarda en BD)
+  // Comprobar cambios
   const sinCambios = 
     (nombreUsuario === originalNombre) && 
     (correoelectronico === originalCorreo);
@@ -164,40 +144,6 @@ const Cuenta: React.FC = () => {
       
       <form onSubmit={handleSubmit} className="w-100" style={{ maxWidth: '400px' }}>
         <h3 className="text-white mb-4 text-center">Configuración de Cuenta</h3>
-
-        {/* --- FOTO DE PERFIL (Solo Visual) --- */}
-        <div className="text-center mb-3">
-          <img
-            src={fotoActual || defaultAvatar} 
-            alt="Foto de perfil"
-            className="profile-picture"
-          />
-        </div>
-
-        <div className="d-flex justify-content-center mb-4">
-          <label htmlFor="fotoInput" className="btn btn-sm btn-outline-light me-2 mb-0">
-            Cambiar Foto
-          </label>
-          <input
-            type="file"
-            id="fotoInput"
-            style={{ display: 'none' }}
-            accept="image/png, image/jpeg"
-            onChange={handleFotoChange}
-          />
-          <button
-            type="button"
-            className="btn btn-sm btn-outline-danger"
-            onClick={handleFotoDelete}
-            disabled={!fotoActual} 
-          >
-            Eliminar Foto
-          </button>
-        </div>
-        {/* Nota sobre la foto */}
-        <p className="text-muted text-center small fst-italic mb-3">
-            * La foto es local y no se guardará en el servidor.
-        </p>
         
         {/* --- CAMPOS DEL FORMULARIO --- */}
         

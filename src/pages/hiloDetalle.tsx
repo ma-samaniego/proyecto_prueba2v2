@@ -8,9 +8,20 @@ interface Comentario {
     id: number;
     publicationId: number;
     usuarioId: number;
-    contenido: string; // El backend usa 'contenido', el JSON Alias permite 'text' pero mejor usar el nombre real
+    contenido: string; 
     autorNombre: string;
     fechaCreacion: string;
+}
+
+// (Opcional) Interfaz para el Hilo para tener mejor tipado en lugar de 'any'
+interface Hilo {
+    id: number;
+    title: string;
+    category: string;
+    createDt: string;
+    authorname: string;
+    imageUri?: string | null;
+    description: string;
 }
 
 const HiloDetalle: React.FC = () => {
@@ -18,11 +29,12 @@ const HiloDetalle: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [hilo, setHilo] = useState<any>(location.state?.hilo || null);
+  // Intentamos tomar el hilo del estado de navegación, si no iniciamos en null
+  const [hilo, setHilo] = useState<Hilo | null>(location.state?.hilo || null);
   const [comentarios, setComentarios] = useState<Comentario[]>([]);
   const [nuevoComentario, setNuevoComentario] = useState('');
 
-  // Cargar hilo si no viene por state (opcional) y Cargar comentarios
+  // Cargar hilo (si no vino por state) y Cargar comentarios
   useEffect(() => {
     if (id) {
         cargarComentarios(Number(id));
@@ -46,7 +58,7 @@ const HiloDetalle: React.FC = () => {
   }
 
   const handleAgregarComentario = async () => {
-    if (!nuevoComentario.trim()) return;
+    if (!nuevoComentario.trim() || !hilo) return;
 
     const usuarioId = Number(localStorage.getItem('usuario_id'));
     const autorNombre = localStorage.getItem('nombre_usuario') || 'Anonimo';
@@ -93,10 +105,18 @@ const HiloDetalle: React.FC = () => {
             <hr className="divider-neon" />
 
             <div className="hilo-body">
-                <div className="imagen-frame mb-4">
-                    <img src={hilo.imageUri} alt={hilo.title} className="imagen-principal" 
-                        onError={(e) => (e.currentTarget.src = 'https://placehold.co/600x400/333/fff?text=No+Image')} />
-                </div>
+                {/* CAMBIO: Solo mostramos el contenedor de imagen si existe una URL válida */}
+                {hilo.imageUri && (
+                    <div className="imagen-frame mb-4">
+                        <img 
+                            src={hilo.imageUri} 
+                            alt={hilo.title} 
+                            className="imagen-principal" 
+                            onError={(e) => (e.currentTarget.style.display = 'none')} // Ocultar si la URL está rota
+                        />
+                    </div>
+                )}
+                
                 <p className="texto-contenido">{hilo.description}</p>
             </div>
 
@@ -108,18 +128,22 @@ const HiloDetalle: React.FC = () => {
                 </h3>
 
                 <div className="lista-comentarios mb-5">
-                    {comentarios.map((com) => (
-                        <div key={com.id} className="comentario-row">
-                            <div className="avatar-circle">{com.autorNombre.charAt(0).toUpperCase()}</div>
-                            <div className="comentario-data">
-                                <div className="d-flex justify-content-between">
-                                    <span className="autor-nombre">{com.autorNombre}</span>
-                                    <span className="fecha-texto">{com.fechaCreacion ? com.fechaCreacion.split('T')[0] : ''}</span>
+                    {comentarios.length > 0 ? (
+                        comentarios.map((com) => (
+                            <div key={com.id} className="comentario-row">
+                                <div className="avatar-circle">{com.autorNombre.charAt(0).toUpperCase()}</div>
+                                <div className="comentario-data">
+                                    <div className="d-flex justify-content-between">
+                                        <span className="autor-nombre">{com.autorNombre}</span>
+                                        <span className="fecha-texto">{com.fechaCreacion ? com.fechaCreacion.split('T')[0] : ''}</span>
+                                    </div>
+                                    <p className="mensaje-texto">{com.contenido}</p>
                                 </div>
-                                <p className="mensaje-texto">{com.contenido}</p>
                             </div>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        <p className="text-muted">No hay comentarios aún. ¡Sé el primero!</p>
+                    )}
                 </div>
 
                 <div className="input-area">
