@@ -1,18 +1,20 @@
 import React, { useState } from "react";
 import '../css/registro.css';
 import logo from '../img/logo.png';
-import { useNavigate } from "react-router-dom"; // permite la navegación entre páginas
+import { useNavigate } from "react-router-dom";
+import api from "../services/api"; // Importamos Axios
 
 const Registro: React.FC = () => {
-  // Estados para los campos del formulario
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const [correoelectronico, setCorreoelectronico] = useState('');
   const [contraseña, setContraseña] = useState('');
+  
+  // Estado para feedback de carga/error
+  const [cargando, setCargando] = useState(false);
 
   const navigate = useNavigate();
 
-  // Estado para los errores
   const [errores, setErrores] = useState({
     nombre: "",
     telefono: "",
@@ -20,13 +22,10 @@ const Registro: React.FC = () => {
     contraseña: "",
   });
 
-  // Función de validación
   const validarFormulario = () => {
     const nuevosErrores = { nombre: "", telefono: "", correoelectronico: "", contraseña: "" };
     
-    if (!nombre.trim()) {
-      nuevosErrores.nombre = "El nombre es obligatorio.";
-    }
+    if (!nombre.trim()) nuevosErrores.nombre = "El nombre es obligatorio.";
 
     const telefonoRegex = /^[0-9]+$/;
     if (!telefono.trim()) {
@@ -42,34 +41,52 @@ const Registro: React.FC = () => {
       nuevosErrores.correoelectronico = "Formato de email no válido.";
     }
     
-    if (!contraseña.trim()) {
-      nuevosErrores.contraseña = "La contraseña es obligatoria.";
-    }
+    if (!contraseña.trim()) nuevosErrores.contraseña = "La contraseña es obligatoria.";
 
     setErrores(nuevosErrores);
-    return nuevosErrores;
+    // Retorna true si NO hay errores
+    return !Object.values(nuevosErrores).some(error => error !== "");
   }
 
-  // Manejador de envío del formulario de registro
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); 
-    const resultadoErrores = validarFormulario();
-    
-    if (!resultadoErrores.nombre && !resultadoErrores.telefono && !resultadoErrores.correoelectronico && !resultadoErrores.contraseña) {
-      alert(`¡Gracias por registrarte, ${nombre}! Serás redirigido para iniciar sesión.`);
-      // Navega a la página de inicio de sesión después del registro exitoso
-      navigate('/inicioSesion'); 
+    if (!validarFormulario()) return;
+
+    setCargando(true);
+
+    // Construimos el objeto tal cual lo espera tu UsuarioController.java
+    const nuevoUsuario = {
+        nombre_usuario: nombre,
+        contrasena: contraseña,
+        numero_telefono: telefono,
+        correo: correoelectronico,
+        estado: "ACTIVO", // Enum en backend
+        rol: {
+            rol_id: 2 // Asignamos rol de USER (ID 2 según tu LoadDatabase)
+        }
+    };
+
+    try {
+        // POST a /api/v1/users (vía Gateway puerto 8080)
+        await api.post('/api/v1/users', nuevoUsuario);
+        
+        alert(`¡Cuenta creada con éxito, ${nombre}! Ahora puedes iniciar sesión.`);
+        navigate('/inicioSesion'); 
+
+    } catch (error: any) {
+        console.error("Error en registro:", error);
+        // Si el backend devuelve un mensaje de error específico (ej. correo duplicado)
+        const mensajeError = error.response?.data || "Hubo un error al registrarte. Inténtalo de nuevo.";
+        alert(mensajeError);
+    } finally {
+        setCargando(false);
     }
   }
 
-  // --- FUNCIÓN CORREGIDA ---
-  // Manejador para el botón "Si ya tienes cuenta..."
   const handleNavigateToLogin = () => {
-    // Navega a la ruta donde está el componente InicioSesion
     navigate('/inicioSesion'); 
   };
     
-  // Lógica para deshabilitar el botón de registro
   const botonDeshabilitado =
     !!errores.nombre ||
     !!errores.telefono ||
@@ -78,8 +95,8 @@ const Registro: React.FC = () => {
     !nombre.trim() ||
     !telefono.trim() ||
     !correoelectronico.trim() ||
-    !contraseña.trim();
-
+    !contraseña.trim() ||
+    cargando; // Deshabilitar mientras carga
 
   return (
     <div className="contenedor-form-registro">
@@ -91,20 +108,19 @@ const Registro: React.FC = () => {
       
       <form onSubmit={handleSubmit} className="w-100" style={{ maxWidth: '400px' }}>
         
-        {/* Campo Nombre */}
         <div className="mb-3">
-          <label htmlFor="nombre" className="form-label text-white">Nombre Completo</label>
+          <label htmlFor="nombre" className="form-label text-white">Nombre de Usuario</label>
           <input 
             type="text"
             id="nombre"
             className="form-control"
             value={nombre}
-            onChange={(e) => { setNombre(e.target.value); validarFormulario(); }}
+            onChange={(e) => { setNombre(e.target.value); }}
+            onBlur={validarFormulario}
           />
           {errores.nombre && <div className="text-danger">{errores.nombre}</div>}
         </div>
 
-        {/* Campo Teléfono */}
         <div className="mb-3">
           <label htmlFor="telefono" className="form-label text-white">Número de Teléfono</label>
           <input 
@@ -112,12 +128,12 @@ const Registro: React.FC = () => {
             id="telefono"
             className="form-control"
             value={telefono}
-            onChange={(e) => { setTelefono(e.target.value); validarFormulario(); }}
+            onChange={(e) => { setTelefono(e.target.value); }}
+            onBlur={validarFormulario}
           />
           {errores.telefono && <div className="text-danger">{errores.telefono}</div>}
         </div>
 
-        {/* Campo Correo Electrónico */}
         <div className="mb-3">
           <label htmlFor="correo" className="form-label text-white">Correo Electrónico</label>
           <input 
@@ -125,12 +141,12 @@ const Registro: React.FC = () => {
             id="correo"
             className="form-control"
             value={correoelectronico}
-            onChange={(e) => { setCorreoelectronico(e.target.value); validarFormulario(); }}
+            onChange={(e) => { setCorreoelectronico(e.target.value); }}
+            onBlur={validarFormulario}
           />
           {errores.correoelectronico && <div className="text-danger">{errores.correoelectronico}</div>}
         </div>
         
-        {/* Campo Contraseña */}
         <div className="mb-3">
           <label htmlFor="contraseña" className="form-label text-white">Contraseña</label>
           <input 
@@ -138,19 +154,18 @@ const Registro: React.FC = () => {
             id="contraseña"
             className="form-control"
             value={contraseña}
-            onChange={(e) => { setContraseña(e.target.value); validarFormulario(); }}
+            onChange={(e) => { setContraseña(e.target.value); }}
+            onBlur={validarFormulario}
           />
           {errores.contraseña && <div className="text-danger">{errores.contraseña}</div>}
         </div>
         
-        {/* Botón Registrarse */}
         <button type="submit" className="btn btn-light w-100" disabled={botonDeshabilitado}>
-          Registrarse 
+          {cargando ? 'Registrando...' : 'Registrarse'}
         </button>
         
         <div className="separator">O</div>
 
-        {/* Botón para ir a Iniciar Sesión */}
         <button type="button" className="btn btn-light w-100" onClick={handleNavigateToLogin}>
           Si ya tienes cuenta, inicia sesión
         </button>

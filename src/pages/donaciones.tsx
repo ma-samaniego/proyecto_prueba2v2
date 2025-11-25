@@ -1,7 +1,7 @@
-// src/pages/donaciones.tsx
-import React, { useState } from "react";
-import '../css/donaciones.css';
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api"; 
+import '../css/donaciones.css';
 
 const Donaciones: React.FC = () => {
   const navigate = useNavigate();
@@ -11,25 +11,33 @@ const Donaciones: React.FC = () => {
   const [montoPersonalizado, setMontoPersonalizado] = useState('');
   const [nombreTarjeta, setNombreTarjeta] = useState('');
   const [numeroTarjeta, setNumeroTarjeta] = useState('');
+  const [mensaje, setMensaje] = useState('');
   const [procesando, setProcesando] = useState(false);
 
-  // Opciones de donación
   const opcionesMontos = [5000, 10000, 20000];
+
+  // Verificar sesión
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert("Debes iniciar sesión para realizar una donación.");
+        navigate('/inicioSesion');
+    }
+  }, [navigate]);
 
   const handleSelectMonto = (monto: number) => {
     setMontoSeleccionado(monto);
-    setMontoPersonalizado(''); // Limpiamos el personalizado si elige uno fijo
+    setMontoPersonalizado('');
   };
 
   const handlePersonalizadoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMontoPersonalizado(e.target.value);
-    setMontoSeleccionado(null); // Desmarcamos los botones fijos
+    setMontoSeleccionado(null);
   };
 
-  const handleDonar = (e: React.FormEvent) => {
+  const handleDonar = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validación simple
     const montoFinal = montoSeleccionado || Number(montoPersonalizado);
     
     if (!montoFinal || montoFinal <= 0) {
@@ -42,14 +50,29 @@ const Donaciones: React.FC = () => {
       return;
     }
 
-    // Simulación de proceso de pago
     setProcesando(true);
+
+    const usuarioId = Number(localStorage.getItem('usuario_id'));
     
-    setTimeout(() => {
-      setProcesando(false);
-      alert(`¡Muchas gracias ${nombreTarjeta}! Tu donación de $${montoFinal} ha sido recibida con éxito. Esto nos ayuda a mantener PixelHub vivo.`);
-      navigate('/principal');
-    }, 2000); // Simula 2 segundos de espera
+    // Objeto limpio, sin publicationId
+    const nuevaDonacion = {
+        usuarioDonanteId: usuarioId,
+        monto: montoFinal,
+        metodoPago: "TARJETA",
+        mensaje: mensaje || "Apoyo a la comunidad PixelHub" // Mensaje por defecto si está vacío
+    };
+
+    try {
+        await api.post('/api/donaciones', nuevaDonacion);
+        alert(`¡Gracias ${nombreTarjeta}! Tu donación de $${montoFinal} ayuda a mantener PixelHub en línea.`);
+        navigate('/principal');
+
+    } catch (error) {
+        console.error("Error al donar:", error);
+        alert("Hubo un error al procesar tu donación. Inténtalo nuevamente.");
+    } finally {
+        setProcesando(false);
+    }
   };
 
   return (
@@ -60,7 +83,6 @@ const Donaciones: React.FC = () => {
       </div>
 
       <form onSubmit={handleDonar}>
-        {/* Selección de Monto */}
         <h5 className="text-start mb-3">Selecciona un monto:</h5>
         <div className="montos-grid">
           {opcionesMontos.map((monto) => (
@@ -75,7 +97,6 @@ const Donaciones: React.FC = () => {
           ))}
         </div>
 
-        {/* Monto Personalizado */}
         <div className="mb-4">
           <input
             type="number"
@@ -87,10 +108,20 @@ const Donaciones: React.FC = () => {
           />
         </div>
 
-        {/* Datos de Tarjeta (Simulado) */}
+        <div className="mb-4 text-start">
+            <label className="form-label text-white">Mensaje (Opcional)</label>
+            <textarea 
+                className="form-control" 
+                rows={2}
+                placeholder="¡Sigan así!"
+                value={mensaje}
+                onChange={(e) => setMensaje(e.target.value)}
+                style={{ backgroundColor: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid #F0127E' }}
+            ></textarea>
+        </div>
+
         <div className="tarjeta-simulada">
-            <h5 className="mb-3 text-white">Detalles del Pago (Simulación)</h5>
-            
+            <h5 className="mb-3 text-white">Detalles del Pago</h5>
             <div className="mb-3">
                 <label className="form-label text-white">Nombre en la tarjeta</label>
                 <input 
@@ -101,7 +132,6 @@ const Donaciones: React.FC = () => {
                     onChange={(e) => setNombreTarjeta(e.target.value)}
                 />
             </div>
-
             <div className="row">
                 <div className="col-8">
                     <label className="form-label text-white">Número de tarjeta</label>
@@ -130,7 +160,7 @@ const Donaciones: React.FC = () => {
             className="btn btn-link text-white mt-2 text-decoration-none"
             onClick={() => navigate('/principal')}
         >
-            Volver sin donar
+            Volver
         </button>
 
       </form>

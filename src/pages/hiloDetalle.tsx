@@ -1,151 +1,135 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { initialHilosData, type Comment } from '../data/hilosData'; 
+import api from "../services/api"; // Axios
 import '../css/hiloDetalle.css';
+
+// Interfaz que coincide con ComentarioModel.java
+interface Comentario {
+    id: number;
+    publicationId: number;
+    usuarioId: number;
+    contenido: string; // El backend usa 'contenido', el JSON Alias permite 'text' pero mejor usar el nombre real
+    autorNombre: string;
+    fechaCreacion: string;
+}
 
 const HiloDetalle: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [hilo, setHilo] = useState<any>(null);
-  const [comentarios, setComentarios] = useState<Comment[]>([]);
+  const [hilo, setHilo] = useState<any>(location.state?.hilo || null);
+  const [comentarios, setComentarios] = useState<Comentario[]>([]);
   const [nuevoComentario, setNuevoComentario] = useState('');
 
+  // Cargar hilo si no viene por state (opcional) y Cargar comentarios
   useEffect(() => {
-    let currentHilo = location.state?.hilo;
-
-    if (!currentHilo && id) {
-      currentHilo = initialHilosData.find(h => h.id === Number(id));
+    if (id) {
+        cargarComentarios(Number(id));
+        if(!hilo) cargarHilo(Number(id));
     }
+  }, [id]);
 
-    setHilo(currentHilo);
+  const cargarHilo = async (pubId: number) => {
+      try {
+          const res = await api.get(`/api/publicaciones/${pubId}`);
+          setHilo(res.data);
+      } catch (e) { console.error("Error cargando hilo", e); }
+  }
 
-    if (currentHilo && currentHilo.commentsList) {
-      setComentarios(currentHilo.commentsList);
-    }
-  }, [id, location.state]);
+  const cargarComentarios = async (pubId: number) => {
+      try {
+          // Endpoint definido en ComentarioController.java
+          const res = await api.get(`/api/comentarios/publicacion/${pubId}`);
+          setComentarios(res.data);
+      } catch (e) { console.error("Error cargando comentarios", e); }
+  }
 
-  const handleAgregarComentario = () => {
+  const handleAgregarComentario = async () => {
     if (!nuevoComentario.trim()) return;
 
-    const nuevo: Comment = {
-      id: Date.now(),
-      author: 'Usuario', 
-      text: nuevoComentario,
-      date: new Date().toLocaleDateString()
+    const usuarioId = Number(localStorage.getItem('usuario_id'));
+    const autorNombre = localStorage.getItem('nombre_usuario') || 'Anonimo';
+
+    const payload = {
+        publicationId: hilo.id,
+        usuarioId: usuarioId,
+        contenido: nuevoComentario,
+        autorNombre: autorNombre,
+        // fechaCreacion se asigna en backend si va vacía
     };
 
-    setComentarios([...comentarios, nuevo]);
-    setNuevoComentario('');
-    
-    // Si quisieras actualizar el contador de comentarios en el objeto hilo:
-    if (hilo) {
-        setHilo({ ...hilo, comments: comentarios.length + 1 });
+    try {
+        // POST a /api/comentarios/comentar
+        const res = await api.post('/api/comentarios/comentar', payload);
+        setComentarios([...comentarios, res.data]);
+        setNuevoComentario('');
+    } catch (error) {
+        console.error("Error publicando comentario", error);
+        alert("Error al comentar.");
     }
   };
 
-  if (!hilo) {
-    return (
-      <div className="container text-center text-white mt-5">
-        <h2>Hilo no encontrado 👾</h2>
-        <button onClick={() => navigate('/principal')} className="btn btn-primary mt-3">Volver al Hub</button>
-      </div>
-    );
-  }
+  if (!hilo) return <div className="text-white mt-5 text-center">Cargando...</div>;
 
   return (
     <div className="container my-4">
-        
-        {/* --- CÁPSULA ÚNICA --- */}
         <div className="card-hilo-unica">
-            
-            {/* 1. BOTÓN VOLVER */}
             <div className="mb-4">
-                <button onClick={() => navigate('/principal')} className="btn-volver">
-                    ← Volver
-                </button>
+                <button onClick={() => navigate('/principal')} className="btn-volver">← Volver</button>
             </div>
             
-            {/* 2. Header del Hilo */}
             <div className="hilo-header">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                     <span className="badge bg-warning text-dark fs-6">{hilo.category}</span>
-                    <span className="text-muted small">{hilo.date}</span>
+                    <span className="text-muted small">{hilo.createDt ? hilo.createDt.split('T')[0] : ''}</span>
                 </div>
                 <h1 className="display-6 fw-bold mb-3 text-white">{hilo.title}</h1>
                 <div className="hilo-meta">
-                    {/* Likes eliminados, solo queda el autor */}
-                    <span>👤 <strong>{hilo.author}</strong></span>
+                    <span>👤 <strong>{hilo.authorname}</strong></span>
                 </div>
             </div>
 
             <hr className="divider-neon" />
 
-            {/* 3. Cuerpo del Hilo (Imagen + Texto) */}
             <div className="hilo-body">
                 <div className="imagen-frame mb-4">
-                    <img 
-                        src={hilo.imageUrl} 
-                        alt={hilo.title} 
-                        className="imagen-principal"
-                        onError={(e) => (e.currentTarget.src = 'https://placehold.co/600x400/333/fff?text=No+Image')}
-                    />
+                    <img src={hilo.imageUri} alt={hilo.title} className="imagen-principal" 
+                        onError={(e) => (e.currentTarget.src = 'https://placehold.co/600x400/333/fff?text=No+Image')} />
                 </div>
-                <p className="texto-contenido">{hilo.content}</p>
+                <p className="texto-contenido">{hilo.description}</p>
             </div>
 
             <hr className="divider-neon" />
 
-            {/* 4. Comentarios INTEGRADOS */}
             <div className="hilo-footer-comentarios">
                 <h3 className="mb-4 text-white">
                     Comentarios <span className="text-primary fs-5">({comentarios.length})</span>
                 </h3>
 
-                {/* Lista */}
                 <div className="lista-comentarios mb-5">
-                    {comentarios.length > 0 ? (
-                        comentarios.map((com) => (
-                            <div key={com.id} className="comentario-row">
-                                <div className="avatar-circle">
-                                    {com.author.charAt(0).toUpperCase()}
+                    {comentarios.map((com) => (
+                        <div key={com.id} className="comentario-row">
+                            <div className="avatar-circle">{com.autorNombre.charAt(0).toUpperCase()}</div>
+                            <div className="comentario-data">
+                                <div className="d-flex justify-content-between">
+                                    <span className="autor-nombre">{com.autorNombre}</span>
+                                    <span className="fecha-texto">{com.fechaCreacion ? com.fechaCreacion.split('T')[0] : ''}</span>
                                 </div>
-                                <div className="comentario-data">
-                                    <div className="d-flex justify-content-between">
-                                        <span className="autor-nombre">{com.author}</span>
-                                        <span className="fecha-texto">{com.date}</span>
-                                    </div>
-                                    <p className="mensaje-texto">{com.text}</p>
-                                </div>
+                                <p className="mensaje-texto">{com.contenido}</p>
                             </div>
-                        ))
-                    ) : (
-                        <p className="text-center text-muted fst-italic py-3">
-                            Sé el primero en comentar en este hilo...
-                        </p>
-                    )}
+                        </div>
+                    ))}
                 </div>
 
-                {/* Input */}
                 <div className="input-area">
-                    <textarea 
-                        className="form-control input-dark" 
-                        rows={2} 
-                        placeholder="Escribe un comentario..."
-                        value={nuevoComentario}
-                        onChange={(e) => setNuevoComentario(e.target.value)}
-                    ></textarea>
-                    <button 
-                        className="btn-enviar mt-2" 
-                        onClick={handleAgregarComentario}
-                        disabled={!nuevoComentario.trim()}
-                    >
+                    <textarea className="form-control input-dark" rows={2} placeholder="Escribe un comentario..."
+                        value={nuevoComentario} onChange={(e) => setNuevoComentario(e.target.value)}></textarea>
+                    <button className="btn-enviar mt-2" onClick={handleAgregarComentario} disabled={!nuevoComentario.trim()}>
                         Publicar Comentario 🚀
                     </button>
                 </div>
             </div>
-
         </div>
     </div>
   );

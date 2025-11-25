@@ -1,138 +1,91 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api"; // Importamos nuestra api configurada
 import '../css/cuenta.css';
 import logo from '../img/logo.png';
 
 interface InicioSesionProps {
-  onLoginSuccess: (email: string) => void;
+  onLoginSuccess: (email: string) => void; // Mantenemos props por compatibilidad
   onNavigateToRegister: () => void;
 }
 
 const InicioSesion: React.FC<InicioSesionProps> = ({ onLoginSuccess, onNavigateToRegister }) => {
+  const [nombreUsuario, setNombreUsuario] = useState(''); // Cambiado de email a nombreUsuario según tu backend
+  const [contrasena, setContraseña] = useState('');
+  const [error, setError] = useState('');
+  const [cargando, setCargando] = useState(false);
+  const navigate = useNavigate();
 
-  const [correoelectronico, setCorreoelectronico] = useState('');
-  const [contraseña, setContraseña] = useState('');
-
-  const [errores, setErrores] = useState({
-    correoelectronico: "",
-    contraseña: "",
-  });
-
-  // Función de validación (devuelve todos los errores posibles)
-  const getValidationErrors = (email: string, pass: string) => {
-    const nuevosErrores = { correoelectronico: "", contraseña: "" };
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email.trim()) {
-      nuevosErrores.correoelectronico = "El correo electrónico es obligatorio.";
-    } else if (!emailRegex.test(email)) {
-      nuevosErrores.correoelectronico = "Formato de email no válido.";
-    }
-    if(!pass.trim()){
-      nuevosErrores.contraseña = "La contraseña es obligatoria.";
-    }
-    return nuevosErrores;
-  }
-
-  // --- NUEVO: Manejador específico para el email ---
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newEmail = e.target.value;
-    setCorreoelectronico(newEmail);
-    // Validamos con el nuevo email y la contraseña actual
-    const validationErrors = getValidationErrors(newEmail, contraseña);
-    // Actualizamos SOLO el error del email
-    setErrores(prevErrores => ({
-      ...prevErrores,
-      correoelectronico: validationErrors.correoelectronico
-    }));
-  }
-
-  // --- NUEVO: Manejador específico para la contraseña ---
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newPassword = e.target.value;
-    setContraseña(newPassword);
-    // Validamos con el email actual y la nueva contraseña
-    const validationErrors = getValidationErrors(correoelectronico, newPassword);
-     // Actualizamos SOLO el error de la contraseña
-    setErrores(prevErrores => ({
-      ...prevErrores,
-      contraseña: validationErrors.contraseña
-    }));
-  }
-
-  // Al enviar, hacemos una validación final completa
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const finalErrors = getValidationErrors(correoelectronico, contraseña);
-    setErrores(finalErrors); // Mostramos todos los errores si los hay
+    setError('');
+    setCargando(true);
 
-     if (!finalErrors.correoelectronico && !finalErrors.contraseña) {
-      onLoginSuccess(correoelectronico);
-      setCorreoelectronico("");
-      setContraseña("");
-      setErrores({ correoelectronico: "", contraseña: "" });
+    try {
+        // Petición al endpoint definido en LoginController.java
+        const response = await api.post('/api/v1/auth/login', {
+            nombreUsuario: nombreUsuario,
+            contrasena: contrasena
+        });
+
+        // Guardamos datos críticos en LocalStorage
+        const { token, usuario_id, nombre_usuario, rol_id } = response.data;
+        
+        localStorage.setItem('token', token);
+        localStorage.setItem('usuario_id', String(usuario_id));
+        localStorage.setItem('nombre_usuario', nombre_usuario);
+        localStorage.setItem('rol_id', String(rol_id));
+
+        alert(`¡Bienvenido ${nombre_usuario}!`);
+        navigate('/principal');
+
+    } catch (err: any) {
+        console.error(err);
+        setError("Credenciales incorrectas o error en el servidor.");
+    } finally {
+        setCargando(false);
     }
   }
-
-  const handleNavigateToRegistro = () => {
-    onNavigateToRegister();
-  };
-
-  // El botón está deshabilitado si los campos están vacíos O si hay algún error en el estado actual
-  const botonDeshabilitado =
-    !correoelectronico.trim() ||
-    !contraseña.trim() ||
-    !!errores.correoelectronico ||
-    !!errores.contraseña;
-
 
   return (
     <div className="contenedor-form-inicio">
-      <img
-        src={logo}
-        alt="Logo de PixelHub"
-        className="navbar-logo"
-      />
-
+      <img src={logo} alt="Logo de PixelHub" className="navbar-logo" />
+      
       <form onSubmit={handleSubmit} className="w-100" style={{ maxWidth: '400px' }}>
+        {error && <div className="alert alert-danger text-center">{error}</div>}
+        
         <div className="mb-3">
-          <label htmlFor="correo" className="form-label text-white">Correo Electrónico</label>
+          <label className="form-label text-white">Nombre de Usuario</label>
           <input
-            type="email"
-            id="correo"
+            type="text"
             className="form-control"
-            value={correoelectronico}
-            // --- CAMBIO: Usar el manejador específico ---
-            onChange={handleEmailChange}
+            value={nombreUsuario}
+            onChange={(e) => setNombreUsuario(e.target.value)}
             required
           />
-          {errores.correoelectronico && <div className="text-danger">{errores.correoelectronico}</div>}
         </div>
 
         <div className="mb-3">
-          <label htmlFor="contraseña" className="form-label text-white">Contraseña</label>
+          <label className="form-label text-white">Contraseña</label>
           <input
             type="password"
-            id="contraseña"
             className="form-control"
-            value={contraseña}
-            // --- CAMBIO: Usar el manejador específico ---
-            onChange={handlePasswordChange}
+            value={contrasena}
+            onChange={(e) => setContraseña(e.target.value)}
             required
           />
-          {errores.contraseña && <div className="text-danger">{errores.contraseña}</div>}
         </div>
 
-        <button type="submit" className="btn btn-light w-100 " disabled={botonDeshabilitado}>
-          Ingresar
+        <button type="submit" className="btn btn-light w-100" disabled={cargando}>
+          {cargando ? 'Ingresando...' : 'Ingresar'}
         </button>
 
         <div className="separator">O</div>
 
-        <button type="button" className="btn btn-light w-100" onClick={handleNavigateToRegistro}>
+        <button type="button" className="btn btn-light w-100" onClick={onNavigateToRegister}>
           Registrate
         </button>
-
       </form>
-
     </div>
   );
 };

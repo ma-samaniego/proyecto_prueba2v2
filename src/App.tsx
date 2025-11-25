@@ -7,19 +7,25 @@ import Principal from './pages/principal';
 import InicioSesion from './pages/inicioSesion';
 import Cuenta from './pages/cuenta';
 import Registro from './pages/registro';
-import Contacto from "./pages/contacto";
-import Donaciones from "./pages/donaciones";   // <-- Nueva página
-import HiloDetalle from "./pages/hiloDetalle"; // <-- Nueva página dinámica
+import Donaciones from "./pages/donaciones";
+import HiloDetalle from "./pages/hiloDetalle";
 
 // --- COMPONENTE NAVBAR ---
 function Navbar() {
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token');
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/inicioSesion');
+  };
+
   return (
     <div className="navbar-wrapper">
       <nav className="navbar navbar-expand-lg mi-navbar">
         <div className="container-fluid">
-          <Link className="nav-link navbar-brand-custom" to="/principal">PixelHub</Link>
+          <Link className="nav-link navbar-brand-custom" to="/">PixelHub</Link>
           
-          {/* Botón hamburguesa para móviles */}
           <button 
             className="navbar-toggler bg-light" 
             type="button" 
@@ -33,17 +39,29 @@ function Navbar() {
           </button>
 
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul className="navbar-nav ms-auto">
-              {/* --- NUEVO ENLACE: DONACIONES --- */}
+            <ul className="navbar-nav ms-auto align-items-center">
               <li className="nav-item">
                 <Link className="nav-link" to="/donaciones">Donaciones</Link>
               </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/cuenta">Cuenta</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/contacto">Contacto</Link>
-              </li>
+              
+              {token ? (
+                <>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/cuenta">Cuenta</Link>
+                  </li>
+                  <li className="nav-item">
+                    <button onClick={handleLogout} className="btn btn-sm btn-outline-light ms-2" style={{border: 'none'}}>
+                      Salir
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <li className="nav-item">
+                  <Link className="btn btn-sm btn-primary ms-2 fw-bold" to="/inicioSesion" style={{backgroundColor: '#F0127E', border: 'none'}}>
+                    Iniciar Sesión
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
         </div>
@@ -57,10 +75,9 @@ function App() {
   
   const navigate = useNavigate();
 
-  // Funciones auxiliares para el manejo de sesión (opcional según tu lógica actual)
   const handleLoginSuccess = (email: string) => {
-    alert(`Gracias ${email}, has iniciado sesión!`);
-    navigate('/principal');
+    alert(`Bienvenido de nuevo!`);
+    navigate('/'); // Al loguearse, vamos al inicio (Principal)
   };
 
   const handleNavigateToRegister = () => {
@@ -75,10 +92,10 @@ function App() {
       {/* Contenido Principal Dinámico */}
       <div className="main-content">
         <Routes>
-          {/* Ruta por defecto (Registro) */}
-          <Route path="/" element={<Registro />} />
+          {/* CAMBIO: La ruta por defecto ahora es Principal (Hilos) */}
+          <Route path="/" element={<Principal />} />
           
-          {/* Autenticación */}
+          {/* Rutas de Autenticación */}
           <Route 
             path="/inicioSesion" 
             element={
@@ -90,15 +107,10 @@ function App() {
           />
           <Route path="/registro" element={<Registro />} />
 
-          {/* Páginas Principales */}
+          {/* Páginas del Sistema */}
           <Route path="/principal" element={<Principal />} />
           <Route path="/cuenta" element={<Cuenta />} />
-          <Route path="/contacto" element={<Contacto />} />
-          
-          {/* --- NUEVAS RUTAS --- */}
           <Route path="/donaciones" element={<Donaciones />} />
-          
-          {/* Ruta dinámica para ver el detalle de un hilo específico */}
           <Route path="/hilo/:id" element={<HiloDetalle />} />
 
         </Routes>
